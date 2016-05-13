@@ -1,68 +1,88 @@
 'use strict';
 
-const AllGistContent = React.createClass({
-  getInitialState: function () {
-      return {
-        redditData: []
-      };
+const GistManagerAll = React.createClass({
+  getInitialState: function() {
+    return {
+      gistList: []
+    };
   },
-  loadDataFromReddit: function () {
+  loadDataFromGithub: function() {
     $.ajax({
-      url: this.props.redditUrl,
+      url: this.props.gistUrl,
       dataType: 'json',
+      method: 'GET',
       cache: false,
-      success: function (data) {
-        this.setState({
-          redditData: data.data.children
-        });
+      success: function(data) {
+        this.setState({gistList: data})
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.gistUrl, status, err.toString());
       }.bind(this)
     })
   },
-  componentDidMount: function () {
-    this.loadDataFromReddit()
+  componentDidMount: function() {
+    this.loadDataFromGithub();
   },
-  render: function () {
+  render: function() {
     return (
-      <div className="RedditPage">
-        <h1> Reddit </h1>
-          <RedditList redditData={this.state.redditData} />
+      <div>
+        <h1> Gist Manager </h1>
+        <GistList gistList={this.state.gistList}/>
       </div>
-      )
-    }
-});
-
-const RedditList = React.createClass({
-  render: function () {
-    var redditListNode = this.props.redditData.map(function(redditItem){
-      console.log(redditItem.data.author)
-      return (
-        <RedditItem title={ redditItem.data.title} author={redditItem.data.author} key={redditItem.data.id} >
-        </RedditItem>
-        )
-    })
-    return (
-      <div className='redditList'>
-        <h2> Reddit List Item </h2>
-        {redditListNode}
-      </div>
-      )
-  }
-});
-
-const RedditItem = React.createClass({
-  render: function () {
-    return (
-      <div className='redditItem'>
-        <h3>Title: {this.props.title}</h3>
-        <p>Author: {this.props.author}</p>
-      </div>
-      )
+    )
   }
 })
 
-ReactDOM.render(
-  <RedditPage
-  redditUrl='https://www.reddit.com/r/funny.json'
-  />,
-  document.getElementById('content')
+const GistList = React.createClass({
+  render: function() {
+    var gistItems = this.props.gistList.map(function(gistItem) {
+      return (
+        <GistItem key={gistItem.id} gistItem={gistItem}/>
+      )
+    });
+    return (
+      <div className="GistList">
+        {gistItems}
+      </div>
+    )
+  }
+});
+
+const GistItem = React.createClass({
+  render: function() {
+    return (
+      <div className="GistItem">
+        <a href={this.props.gistItem.html_url}>{this.props.gistItem.html_url}</a>
+        <p>{this.props.gistItem.description}</p>
+      </div>
+    )
+  }
+})
+
+function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) == variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+}
+
+var queryAccessToken = getQueryVariable('accessToken');
+if(queryAccessToken) {
+  localStorage.setItem('accessToken', queryAccessToken);
+  window.location.href = '/';
+}
+
+var accessToken = localStorage.getItem('accessToken');
+if(accessToken) {
+  console.log(accessToken)
+  ReactDOM.render(
+    <GistManagerAll accessToken={accessToken} gistUrl='https://api.github.com/gists'/>,
+    document.getElementById('gistManagerAll')
   )
+} else {
+  window.location.href = '/auth/github';
+}

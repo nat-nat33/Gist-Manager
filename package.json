@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/nat-nat33/Gist-Manager/issues"
   },
-  "homepage": "https://github.com/nat-nat33/Gist-Manager#readme"
+  "homepage": "https://github.com/nat-nat33/Gist-Manager#readme",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "method-override": "^2.3.5",
+    "passport": "^0.3.2",
+    "passport-github2": "^0.1.10",
+    "util": "^0.10.3"
+  }
 }
