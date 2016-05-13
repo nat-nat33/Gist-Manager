@@ -49,27 +49,24 @@ app.use(passport.session());
 app.use(express.static(path.resolve(__dirname, 'public')));
 setUpPassport();
 
-app.use(methodOverride((req, res) => {
-  if(req.body && typeof req.body === 'object' && '_method' in req.body){
-    var method = req.body._method;
-
-    delete req.body._method;
-
-    return method;
-  }
-}));
-
 app.use('/auth', auth);
 
-app.get('/*', (res, req) => {
-  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+app.get('/user', ensureAuthenticated, function(req, res){
+  res.json(req.user);
 });
 
-app.get('/logout', function(req, res){
-  req.logout();
+app.get('*', function(req, res){
+  res.sendFile('./public/index.html',
+              {
+                root  : __dirname
+              });
+});
+
+app.listen(PORT, function(){
+  console.log(`Server listening on port: ${PORT}`);
+});
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
   res.redirect('/');
-});
-
-app.listen(PORT, () => {
-  console.log('listening on port ' + PORT);
-});
+}

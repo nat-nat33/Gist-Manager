@@ -86,3 +86,4 @@ if(accessToken) {
 } else {
   window.location.href = '/auth/github';
 }
+
